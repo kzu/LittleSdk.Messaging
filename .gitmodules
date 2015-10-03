@@ -1,0 +1,3 @@
+[submodule "external/LittleSdk"]
+	path = external/LittleSdk
+	url = git@github.com:kzu/LittleSdk.git

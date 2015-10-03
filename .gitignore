@@ -1,0 +1,11 @@
+.nuget
+.vs
+bin
+obj
+packages
+*.nupkg
+*.suo
+*.user
+.DS_Store
+*.DS_Store
+*.cache
