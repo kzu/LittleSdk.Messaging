@@ -55,7 +55,7 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\GitInfo.1.0.48-pre\build\GitInfo.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GitInfo.1.0.48-pre\build\GitInfo.targets'))" />
-    <Error Condition="!Exists('..\packages\LittleSdk.1.0.3-pre\build\LittleSdk.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\LittleSdk.1.0.3-pre\build\LittleSdk.targets'))" />
+    <Error Condition="!Exists('..\packages\LittleSdk.1.0.4-pre\build\LittleSdk.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\LittleSdk.1.0.4-pre\build\LittleSdk.targets'))" />
   </Target>
-  <Import Project="..\packages\LittleSdk.1.0.3-pre\build\LittleSdk.targets" Condition="Exists('..\packages\LittleSdk.1.0.3-pre\build\LittleSdk.targets')" />
+  <Import Project="..\packages\LittleSdk.1.0.4-pre\build\LittleSdk.targets" Condition="Exists('..\packages\LittleSdk.1.0.4-pre\build\LittleSdk.targets')" />
 </Project>
