@@ -1,0 +1,111 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <IsXBuild Condition="'$(MSBuildRuntimeVersion)' == ''">true</IsXBuild>
+    <ResolveReferencesDependsOn Condition=" '$(IsXBuild)' == 'true' ">
+      <!-- Under Xbuild, just include the binary -->
+      LittleSdkMessaging:AddAssemblyReference;
+      $(ResolveReferencesDependsOn)
+    </ResolveReferencesDependsOn>
+    <ResolveReferencesDependsOn Condition=" '$(IsXBuild)' != 'true' ">
+      LittleSdkMessaging:AddSmartReference;
+      $(ResolveReferencesDependsOn)
+    </ResolveReferencesDependsOn>
+    <CompileDependsOn Condition=" '$(IsXBuild)' == 'true' ">
+      <!-- Under Xbuild, just include the binary -->
+      LittleSdkMessaging:AddAssemblyReference;
+      $(CompileDependsOn)
+    </CompileDependsOn>
+    <CompileDependsOn Condition=" '$(IsXBuild)' != 'true' ">
+      LittleSdkMessaging:AddSmartReference;
+      $(CompileDependsOn);
+    </CompileDependsOn>
+    <AddLittleSdkSmartReferenceDependsOn>
+      LittleSdkMessaging:DetectSubmodule;
+      LittleSdkMessaging:CollectSubmoduleDependencies;
+      LittleSdkMessaging:CompileSubmodule;
+      LittleSdkMessaging:AddSubmoduleReference;
+      LittleSdkMessaging:AddAssemblyReference;
+    </AddLittleSdkSmartReferenceDependsOn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <LittleSdkMessagingReference Include="LittleSdkMessaging">
+      <AssemblyName>LittleSdk.Messaging</AssemblyName>
+      <AssemblyFile>$(MSBuildThisFileDirectory)LittleSdk.Messaging.dll</AssemblyFile>
+      <RepositoryName>LittleSdk.Messaging</RepositoryName>
+      <RelativeSource>src\LittleSdk.Messaging\LittleSdk.Messaging.csproj</RelativeSource>
+      <IsSubmodule>false</IsSubmodule>
+    </LittleSdkMessagingReference>
+  </ItemGroup>
+
+  <Target Name="LittleSdkMessaging:AddAssemblyReference" Condition=" @(LittleSdkMessagingReference -> '%(IsSubmodule)') == 'false' ">
+    <ItemGroup>
+      <Reference Include="%(LittleSdkMessagingReference.AssemblyName)">
+        <HintPath>%(LittleSdkMessagingReference.AssemblyFile)</HintPath>
+        <Private>True</Private>
+      </Reference>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="LittleSdkMessaging:AddSmartReference" DependsOnTargets="$(AddLittleSdkSmartReferenceDependsOn)" />
+
+  <Target Name="LittleSdkMessaging:DetectSubmodule">
+
+    <PropertyGroup>
+      <SubmodulePathExpr>\[submodule[^\]]+\]\s+path\s?=\s?(?&lt;path&gt;[^\s]+).*?\/%(LittleSdkMessagingReference.RepositoryName)\.git</SubmodulePathExpr>
+      <GitSubmodulesFile>$([System.IO.Path]::Combine('$(GitRoot)', '.gitmodules'))</GitSubmodulesFile>
+      <GitSubmodulesFile>$([System.IO.Path]::GetFullPath('$(GitSubmodulesFile)'))</GitSubmodulesFile>
+    </PropertyGroup>
+    <PropertyGroup Condition=" Exists('$(GitSubmodulesFile)') ">
+      <GitSubmodulesContent>$([System.IO.File]::ReadAllText('$(GitSubmodulesFile)'))</GitSubmodulesContent>
+      <IsSubmodule>$([System.Text.RegularExpressions.Regex]::IsMatch('$(GitSubmodulesContent)', '$(SubmodulePathExpr)', System.Text.RegularExpressions.RegexOptions.Singleline))</IsSubmodule>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(IsSubmodule)' == 'true' ">
+      <SubmodulePath>$([System.Text.RegularExpressions.Regex]::Match('$(GitSubmodulesContent)', '$(SubmodulePathExpr)', System.Text.RegularExpressions.RegexOptions.Singleline).Groups['path'].Value)</SubmodulePath>
+      <SubmoduleProject>$([System.IO.Path]::Combine('$(GitRoot)', '$(SubmodulePath)', '%(LittleSdkMessagingReference.RelativeSource)'))</SubmoduleProject>
+      <SubmoduleProject>$([System.IO.Path]::GetFullPath('$(SubmoduleProject)'))</SubmoduleProject>
+      <IsSubmodule Condition=" Exists('$(SubmoduleProject)') ">true</IsSubmodule>
+      <IsSubmodule Condition=" !Exists('$(SubmoduleProject)') ">false</IsSubmodule>
+    </PropertyGroup>
+
+    <ItemGroup Condition=" '$(IsSubmodule)' == 'true' ">
+      <LittleSdkMessagingReference>
+        <IsSubmodule>true</IsSubmodule>
+        <SubmodulePath>$(SubmodulePath)</SubmodulePath>
+        <SubmoduleProject>$(SubmoduleProject)</SubmoduleProject>
+      </LittleSdkMessagingReference>
+    </ItemGroup>
+
+  </Target>
+
+  <Target Name="LittleSdkMessaging:CollectSubmoduleDependencies" Condition=" @(LittleSdkMessagingReference -> '%(IsSubmodule)') == 'true' ">
+    <MSBuild Projects="%(LittleSdkMessagingReference.SubmoduleProject)" Targets="GetCoreCompileInputs">
+      <Output TaskParameter="TargetOutputs" ItemName="LittleSdkMessagingInputs" />
+    </MSBuild>
+    <MSBuild Projects="%(LittleSdkMessagingReference.SubmoduleProject)" Targets="GetCoreCompileOutputs">
+      <Output TaskParameter="TargetOutputs" ItemName="LittleSdkMessagingOutputs" />
+    </MSBuild>
+
+    <DumpItems Items="@(LittleSdkMessagingInputs)" />
+  </Target>
+
+  <Target Name="LittleSdkMessaging:CompileSubmodule" Condition=" @(LittleSdkMessagingReference -> '%(IsSubmodule)') == 'true' "
+          Inputs="@(LittleSdkMessagingInputs)" Outputs="@(LittleSdkMessagingOutputs)">
+    <MSBuild Projects="%(LittleSdkMessagingReference.SubmoduleProject)" Properties="Configuration=$(Configuration)" Targets="Build" />
+  </Target>
+
+  <Target Name="LittleSdkMessaging:AddSubmoduleReference" Condition=" @(LittleSdkMessagingReference -> '%(IsSubmodule)') == 'true' ">
+    <MSBuild Projects="%(LittleSdkMessagingReference.SubmoduleProject)" Properties="Configuration=$(Configuration)" Targets="GetTargetPath">
+      <Output TaskParameter="TargetOutputs" PropertyName="_LittleSdkMessagingAssembly" />
+    </MSBuild>
+
+    <ItemGroup>
+      <Reference Include="%(LittleSdkMessagingReference.AssemblyName)">
+        <HintPath>$(_LittleSdkMessagingAssembly)</HintPath>
+        <Private>True</Private>
+      </Reference>
+    </ItemGroup>
+  </Target>
+
+</Project>

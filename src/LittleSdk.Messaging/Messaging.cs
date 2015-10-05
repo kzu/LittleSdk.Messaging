@@ -2,10 +2,16 @@
 {
 	public class Messaging : IMessaging
 	{
+		private ILittleSdk sdk;
+
+		public Messaging (ILittleSdk sdk)
+		{
+			this.sdk = sdk;
+		}
 
 		public void Send (string message)
 		{
-			// Use LittleSdk to write a message.
+			sdk.Write (message);
 		}
 	}
 }

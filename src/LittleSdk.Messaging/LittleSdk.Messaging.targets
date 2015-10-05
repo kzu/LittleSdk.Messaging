@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <Target Name="GetCoreCompileInputs"
+          Returns="$(MSBuildAllProjects);
+                @(Compile);
+                @(_CoreCompileResourceInputs);
+                $(ApplicationIcon);
+                $(AssemblyOriginatorKeyFile);
+                @(ReferencePath);
+                @(CompiledLicenseFile);
+                @(LinkResource);
+                @(EmbeddedDocumentation);
+                $(Win32Resource);
+                $(Win32Manifest);
+                @(CustomAdditionalCompileInputs);
+                $(ResolvedCodeAnalysisRuleSet)" />
+
+  <Target Name="GetCoreCompileOutputs"
+          Returns="@(DocFileItem);
+                 @(IntermediateAssembly);
+                 @(_DebugSymbolsIntermediatePath);
+                 $(NonExistentFile);
+                 @(CustomAdditionalCompileOutputs)" />
+  
+</Project>
