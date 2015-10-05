@@ -20,13 +20,13 @@
       LittleSdkMessaging:AddSmartReference;
       $(CompileDependsOn);
     </CompileDependsOn>
-    <AddLittleSdkSmartReferenceDependsOn>
+    <AddLittleSdkMessagingSmartReferenceDependsOn>
       LittleSdkMessaging:DetectSubmodule;
       LittleSdkMessaging:CollectSubmoduleDependencies;
       LittleSdkMessaging:CompileSubmodule;
       LittleSdkMessaging:AddSubmoduleReference;
       LittleSdkMessaging:AddAssemblyReference;
-    </AddLittleSdkSmartReferenceDependsOn>
+    </AddLittleSdkMessagingSmartReferenceDependsOn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -49,7 +49,7 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="LittleSdkMessaging:AddSmartReference" DependsOnTargets="$(AddLittleSdkSmartReferenceDependsOn)" />
+  <Target Name="LittleSdkMessaging:AddSmartReference" BeforeTargets="BuildOnlySettings" DependsOnTargets="$(AddLittleSdkMessagingSmartReferenceDependsOn)" />
 
   <Target Name="LittleSdkMessaging:DetectSubmodule">
 
